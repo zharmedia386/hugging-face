@@ -4,9 +4,18 @@ import LogoutButton from "./_components/logout-button";
 
 export default function Home() {
   const tier = process.env.NODE_ENV === "production" ? "prod" : "local";
+  // image-to-3d hidden from the index until we self-host. The free ZeroGPU
+  // quota on every viable Space (Unique3D, TripoSR, Hunyuan3D, TRELLIS) is
+  // too small for a usable demo, and the alternatives hide their Gradio API
+  // behind ZeroGPU signed-URL auth. Route + page still exist at /image-to-3d
+  // for direct testing once the L20 host is wired up.
+  const HIDDEN: Category[] = ["image-to-3d"];
+
   const entries = (Object.entries(MODELS) as Array<
     [Category, (typeof MODELS)[Category]]
-  >).map(([slug, cfg], i) => ({
+  >)
+    .filter(([slug]) => !HIDDEN.includes(slug))
+    .map(([slug, cfg], i) => ({
     slug,
     index: String(i + 1).padStart(2, "0"),
     label: cfg.label,
