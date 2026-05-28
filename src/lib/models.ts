@@ -124,16 +124,19 @@ const DEFAULTS: Record<Category, CategoryConfig> = {
   },
   "image-to-3d": {
     label: "Image → 3D",
-    description: "Single image to .glb mesh (TripoSR)",
+    description: "Single image to .glb mesh (Unique3D)",
     prod: {
-      id: "stabilityai/TripoSR",
+      // Unique3D Space exposes /generate3dv2 publicly.
+      // TripoSR was the original pick but its Gradio API is hidden behind
+      // ZeroGPU auth — /gradio_api/info returns empty endpoints.
+      id: "Wuvin/Unique3D",
       strategy: "space",
-      endpoint: "/generate",
+      endpoint: "/generate3dv2",
     },
     local: {
-      id: "stabilityai/TripoSR",
+      id: "Wuvin/Unique3D",
       strategy: "space",
-      endpoint: "/generate",
+      endpoint: "/generate3dv2",
     },
   },
 };

@@ -80,9 +80,12 @@ export async function transcribe(audio: Blob): Promise<string> {
   const model = pickModel("stt");
 
   if (model.strategy === "inference") {
+    // SDK supports both legacy `{ data }` and new `{ inputs }`. The legacy
+    // form sends as data URL which some providers refuse ("Unsupported data
+    // URL"); `inputs` sends raw bytes.
     const res = await hf.automaticSpeechRecognition({
       model: model.id,
-      data: audio,
+      inputs: audio,
     });
     return res.text;
   }
@@ -168,9 +171,20 @@ export async function imageToMesh(image: Blob): Promise<string> {
   const client = await GradioClient.connect(model.id, {
     token: HF_TOKEN as `hf_${string}` | undefined,
   });
-  const result = await client.predict(model.endpoint ?? "/generate", [image]);
+  // Wuvin/Unique3D /generate3dv2 params:
+  //   preview_img, input_processing (bg removal), seed, render_video,
+  //   do_refine, expansion_weight, init_type
+  const result = await client.predict(model.endpoint ?? "/generate3dv2", {
+    preview_img: image,
+    input_processing: true,
+    seed: 0,
+    render_video: false,
+    do_refine: true,
+    expansion_weight: 0.1,
+    init_type: "std",
+  });
   const data = result.data as unknown[];
-  // TripoSR Space variants return either [meshFile, ...] or [{ url }].
+  // Returns: [Mesh Model, Preview]. Index 0 is the .glb FileData.
   const first = data[0] as { url?: string; path?: string } | string;
   const url = typeof first === "string" ? first : (first.url ?? first.path);
   if (!url) throw new Error("3D Space returned no mesh url");
