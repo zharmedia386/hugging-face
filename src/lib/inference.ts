@@ -101,24 +101,32 @@ export async function synthesizeSpeech(
   voice = "af_heart",
 ): Promise<Blob> {
   const model = pickModel("tts");
-  if (model.strategy !== "space") {
-    throw new Error(`Unsupported strategy for tts: ${model.strategy}`);
+
+  if (model.strategy === "inference") {
+    // Voice arg is ignored — mms-tts-eng has no voice selector.
+    void voice;
+    return await hf.textToSpeech({ model: model.id, inputs: text });
   }
-  const client = await GradioClient.connect(model.id, {
-    token: HF_TOKEN as `hf_${string}` | undefined,
-  });
-  const result = await client.predict(model.endpoint ?? "/generate_first", {
-    text,
-    voice,
-    speed: 1.0,
-  });
-  const first = (result.data as unknown[])[0] as
-    | { url?: string; path?: string }
-    | string;
-  const url = typeof first === "string" ? first : (first.url ?? first.path);
-  if (!url) throw new Error("TTS Space returned no audio url");
-  const r = await fetch(url);
-  return await r.blob();
+
+  if (model.strategy === "space") {
+    const client = await GradioClient.connect(model.id, {
+      token: HF_TOKEN as `hf_${string}` | undefined,
+    });
+    const result = await client.predict(model.endpoint ?? "/generate_first", {
+      text,
+      voice,
+      speed: 1.0,
+    });
+    const first = (result.data as unknown[])[0] as
+      | { url?: string; path?: string }
+      | string;
+    const url = typeof first === "string" ? first : (first.url ?? first.path);
+    if (!url) throw new Error("TTS Space returned no audio url");
+    const r = await fetch(url);
+    return await r.blob();
+  }
+
+  throw new Error(`Unsupported strategy for tts: ${model.strategy}`);
 }
 
 // ---------- bg removal ----------

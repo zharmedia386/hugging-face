@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { transcribe } from "@/lib/inference";
+import { describeError } from "@/lib/error";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -25,9 +26,8 @@ export async function POST(req: Request) {
     const text = await transcribe(file);
     return NextResponse.json({ text });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Inference failed" },
-      { status: 500 },
-    );
+    const msg = describeError(e);
+    console.error("[/api/stt]", msg, e);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

@@ -71,9 +71,10 @@ const DEFAULTS: Record<Category, CategoryConfig> = {
     label: "Image Generation",
     description: "Text → image",
     prod: {
+      // FLUX.1-schnell via HF Inference (not the Space — Space is ZeroGPU and
+      // cold-starts past Cloudflare's 100s edge timeout).
       id: "black-forest-labs/FLUX.1-schnell",
-      strategy: "space",
-      endpoint: "/infer",
+      strategy: "inference",
     },
     local: {
       id: "stabilityai/sd-turbo",
@@ -88,30 +89,33 @@ const DEFAULTS: Record<Category, CategoryConfig> = {
   },
   tts: {
     label: "Text → Speech",
-    description: "Voice synthesis via Kokoro",
+    description: "Voice synthesis via Inference API",
     prod: {
-      id: "hexgrad/Kokoro-TTS",
-      strategy: "space",
-      endpoint: "/generate_first",
+      // MMS-TTS English. Simple text-in audio-out. Works on HF Inference free
+      // tier with a token. Kokoro Space (better quality) hides its Gradio API
+      // and would need ZeroGPU auth + long queue past CF's 100s edge timeout.
+      id: "facebook/mms-tts-eng",
+      strategy: "inference",
     },
     local: {
-      id: "hexgrad/Kokoro-TTS",
-      strategy: "space",
-      endpoint: "/generate_first",
+      id: "facebook/mms-tts-eng",
+      strategy: "inference",
     },
   },
   "bg-removal": {
     label: "Background Removal",
     description: "Strip image background with RMBG",
     prod: {
+      // BRIA RMBG-2.0 Space — confirmed endpoint via /gradio_api/info is
+      // `/image`, NOT `/predict` (our earlier guess).
       id: "briaai/BRIA-RMBG-2.0",
       strategy: "space",
-      endpoint: "/predict",
+      endpoint: "/image",
     },
     local: {
       id: "briaai/BRIA-RMBG-2.0",
       strategy: "space",
-      endpoint: "/predict",
+      endpoint: "/image",
     },
   },
   "image-to-3d": {
