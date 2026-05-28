@@ -89,17 +89,21 @@ const DEFAULTS: Record<Category, CategoryConfig> = {
   },
   tts: {
     label: "Text → Speech",
-    description: "Voice synthesis via Inference API",
+    description: "Voice synthesis via Kokoro",
     prod: {
-      // MMS-TTS English. Simple text-in audio-out. Works on HF Inference free
-      // tier with a token. Kokoro Space (better quality) hides its Gradio API
-      // and would need ZeroGPU auth + long queue past CF's 100s edge timeout.
-      id: "facebook/mms-tts-eng",
-      strategy: "inference",
+      // Kokoro-82M via a Space that exposes a public Gradio API.
+      // Original hexgrad/Kokoro-TTS hides /gradio_api/info; this fork doesn't.
+      // mms-tts-eng (HF Inference) was tried first but errored
+      // "No Inference Provider available" — many TTS models are no longer
+      // routed by HF's serverless Inference in 2026.
+      id: "Remsky/Kokoro-TTS-Zero",
+      strategy: "space",
+      endpoint: "/generate_speech_from_ui",
     },
     local: {
-      id: "facebook/mms-tts-eng",
-      strategy: "inference",
+      id: "Remsky/Kokoro-TTS-Zero",
+      strategy: "space",
+      endpoint: "/generate_speech_from_ui",
     },
   },
   "bg-removal": {

@@ -112,9 +112,10 @@ export async function synthesizeSpeech(
     const client = await GradioClient.connect(model.id, {
       token: HF_TOKEN as `hf_${string}` | undefined,
     });
-    const result = await client.predict(model.endpoint ?? "/generate_first", {
+    // Remsky/Kokoro-TTS-Zero shape: { text, voice_names: string[], speed: number }
+    const result = await client.predict(model.endpoint ?? "/generate_speech_from_ui", {
       text,
-      voice,
+      voice_names: [voice],
       speed: 1.0,
     });
     const first = (result.data as unknown[])[0] as
@@ -139,11 +140,15 @@ export async function removeBackground(image: Blob): Promise<Blob> {
   const client = await GradioClient.connect(model.id, {
     token: HF_TOKEN as `hf_${string}` | undefined,
   });
-  const result = await client.predict(model.endpoint ?? "/predict", [image]);
-  const first = (result.data as unknown[])[0] as
-    | { url?: string; path?: string }
-    | string;
-  const url = typeof first === "string" ? first : (first.url ?? first.path);
+  const result = await client.predict(model.endpoint ?? "/image", [image]);
+  // BRIA RMBG-2.0 /image returns two outputs: [0]=preview component,
+  // [1]=downloadable .png file. We want the transparent PNG (index 1).
+  const data = result.data as unknown[];
+  const target =
+    (data[1] as { url?: string; path?: string } | string | undefined) ??
+    (data[0] as { url?: string; path?: string } | string);
+  const url =
+    typeof target === "string" ? target : (target?.url ?? target?.path);
   if (!url) throw new Error("RMBG Space returned no image url");
   const r = await fetch(url);
   return await r.blob();
