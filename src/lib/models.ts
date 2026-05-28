@@ -84,8 +84,19 @@ const DEFAULTS: Record<Category, CategoryConfig> = {
   stt: {
     label: "Speech → Text",
     description: "Audio transcription via Whisper",
-    prod: { id: "openai/whisper-large-v3", strategy: "inference" },
-    local: { id: "openai/whisper-tiny", strategy: "inference" },
+    prod: {
+      // Whisper-large-v3 via HF Audio Space — direct HF Inference returned
+      // "Unsupported data URL" from the upstream provider for this model.
+      // Space /transcribe_1 takes (audio FileData, task) and returns text.
+      id: "hf-audio/whisper-large-v3",
+      strategy: "space",
+      endpoint: "/transcribe_1",
+    },
+    local: {
+      id: "hf-audio/whisper-large-v3",
+      strategy: "space",
+      endpoint: "/transcribe_1",
+    },
   },
   tts: {
     label: "Text → Speech",

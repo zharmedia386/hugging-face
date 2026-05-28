@@ -80,14 +80,28 @@ export async function transcribe(audio: Blob): Promise<string> {
   const model = pickModel("stt");
 
   if (model.strategy === "inference") {
-    // SDK supports both legacy `{ data }` and new `{ inputs }`. The legacy
-    // form sends as data URL which some providers refuse ("Unsupported data
-    // URL"); `inputs` sends raw bytes.
     const res = await hf.automaticSpeechRecognition({
       model: model.id,
       inputs: audio,
     });
     return res.text;
+  }
+
+  if (model.strategy === "space") {
+    const client = await GradioClient.connect(model.id, {
+      token: HF_TOKEN as `hf_${string}` | undefined,
+    });
+    // hf-audio/whisper-large-v3 /transcribe_1 → (inputs, task) → string
+    const result = await client.predict(model.endpoint ?? "/transcribe_1", {
+      inputs: audio,
+      task: "transcribe",
+    });
+    const data = result.data as unknown[];
+    const text = data[0];
+    if (typeof text !== "string") {
+      throw new Error("STT Space returned non-string output");
+    }
+    return text;
   }
 
   throw new Error(`Unsupported strategy for stt: ${model.strategy}`);
