@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Shell from "../_components/shell";
+import { Button, ErrorNote, FieldLabel, OutputBlock } from "../_components/ui";
 
 export default function BgRemovalPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -32,42 +33,46 @@ export default function BgRemovalPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <Link href="/" className="text-sm text-zinc-500 hover:underline">
-        ← back
-      </Link>
-      <h1 className="mt-4 text-3xl font-bold">Background Removal</h1>
-      <p className="mt-2 text-sm text-zinc-500">RMBG strips background to PNG.</p>
+    <Shell
+      index="05"
+      title="Background removal."
+      description="RMBG isolates the subject and returns a transparent PNG."
+    >
+      <label className="block">
+        <FieldLabel>Image</FieldLabel>
+        <div className="rounded-md border border-dashed border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-6">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="block w-full text-sm text-[var(--color-ink-muted)] file:mr-4 file:rounded-sm file:border-0 file:bg-[var(--color-surface-2)] file:px-3 file:py-2 file:font-mono file:text-[11px] file:uppercase file:tracking-wider file:text-[var(--color-ink)] hover:file:bg-[var(--color-line)]"
+          />
+          {file && (
+            <p className="mt-3 font-mono text-xs text-[var(--color-ink-faint)]">
+              {file.name} · {(file.size / 1024).toFixed(1)} KB
+            </p>
+          )}
+        </div>
+      </label>
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        className="mt-6 block w-full text-sm"
-      />
+      <div className="mt-5">
+        <Button onClick={submit} disabled={loading || !file}>
+          {loading ? "Removing…" : "Strip background →"}
+        </Button>
+      </div>
 
-      <button
-        onClick={submit}
-        disabled={loading || !file}
-        className="mt-3 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-      >
-        {loading ? "Removing…" : "Remove background"}
-      </button>
-
-      {error && (
-        <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-          {error}
-        </p>
-      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
 
       {resultUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={resultUrl}
-          alt="bg removed"
-          className="mt-6 w-full rounded-md border border-zinc-200 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2220%22><rect width=%2210%22 height=%2210%22 fill=%22%23eee%22/><rect x=%2210%22 y=%2210%22 width=%2210%22 height=%2210%22 fill=%22%23eee%22/></svg>')] dark:border-zinc-800"
-        />
+        <OutputBlock>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={resultUrl}
+            alt="bg removed"
+            className="w-full rounded-sm bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2220%22 height=%2220%22><rect width=%2210%22 height=%2210%22 fill=%22%23262422%22/><rect x=%2210%22 y=%2210%22 width=%2210%22 height=%2210%22 fill=%22%23262422%22/></svg>')]"
+          />
+        </OutputBlock>
       )}
-    </main>
+    </Shell>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Shell from "../_components/shell";
+import { Button, ErrorNote, FieldLabel, Input, OutputBlock } from "../_components/ui";
 
 export default function ImagePage() {
   const [prompt, setPrompt] = useState("");
@@ -33,44 +34,38 @@ export default function ImagePage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <Link href="/" className="text-sm text-zinc-500 hover:underline">
-        ← back
-      </Link>
-      <h1 className="mt-4 text-3xl font-bold">Image Generation</h1>
-      <p className="mt-2 text-sm text-zinc-500">
-        First call may take 30–60s — ZeroGPU queue.
-      </p>
+    <Shell
+      index="02"
+      title="Image generation."
+      description="FLUX.1 via a free ZeroGPU Space. The first call can take 30 to 60 seconds while the queue warms."
+    >
+      <label className="block">
+        <FieldLabel>Prompt</FieldLabel>
+        <Input
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="A cyberpunk fox riding a skateboard, golden hour…"
+        />
+      </label>
 
-      <input
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        placeholder="A cyberpunk fox riding a skateboard…"
-        className="mt-6 w-full rounded-md border border-zinc-200 bg-white p-3 text-sm outline-none focus:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:border-zinc-200"
-      />
+      <div className="mt-5">
+        <Button onClick={submit} disabled={loading || !prompt.trim()}>
+          {loading ? "Painting…" : "Generate →"}
+        </Button>
+      </div>
 
-      <button
-        onClick={submit}
-        disabled={loading || !prompt.trim()}
-        className="mt-3 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-      >
-        {loading ? "Generating…" : "Generate"}
-      </button>
-
-      {error && (
-        <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-          {error}
-        </p>
-      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
 
       {imgUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imgUrl}
-          alt="generated"
-          className="mt-6 w-full rounded-md border border-zinc-200 dark:border-zinc-800"
-        />
+        <OutputBlock>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imgUrl}
+            alt="generated"
+            className="w-full rounded-sm"
+          />
+        </OutputBlock>
       )}
-    </main>
+    </Shell>
   );
 }

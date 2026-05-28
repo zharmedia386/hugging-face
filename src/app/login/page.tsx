@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Button, ErrorNote, FieldLabel, Input } from "../_components/ui";
 
 function LoginForm() {
   const router = useRouter();
@@ -35,58 +36,68 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={submit} className="mt-8 space-y-4">
+    <form onSubmit={submit} className="mt-10 space-y-5">
       <label className="block">
-        <span className="text-sm font-medium">Email</span>
-        <input
+        <FieldLabel>Email</FieldLabel>
+        <Input
           type="email"
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border border-zinc-200 bg-white p-2 text-sm outline-none focus:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:border-zinc-200"
+          placeholder="you@example.com"
         />
       </label>
       <label className="block">
-        <span className="text-sm font-medium">Password</span>
-        <input
+        <FieldLabel>Password</FieldLabel>
+        <Input
           type="password"
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border border-zinc-200 bg-white p-2 text-sm outline-none focus:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:border-zinc-200"
+          placeholder="••••••••••••"
         />
       </label>
 
-      {error && (
-        <p className="rounded-md bg-red-50 p-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-          {error}
-        </p>
-      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-      >
-        {loading ? "Signing in…" : "Sign in"}
-      </button>
+      <div className="pt-2">
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? "Signing in…" : "Sign in →"}
+        </Button>
+      </div>
     </form>
   );
 }
 
 export default function LoginPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
-      <h1 className="text-3xl font-bold tracking-tight">Sign in</h1>
-      <p className="mt-2 text-sm text-zinc-500">
-        Single-account access. Credentials in env.
-      </p>
+    <main className="relative flex min-h-screen flex-1 flex-col">
+      <div className="grid-bg pointer-events-none absolute inset-0" />
 
-      <Suspense fallback={null}>
-        <LoginForm />
-      </Suspense>
+      <div className="relative mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-8 py-16">
+        <div className="mb-12 flex items-baseline gap-2">
+          <span className="size-2 rounded-full bg-[var(--color-accent)]" />
+          <span className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
+            hf/playground
+          </span>
+        </div>
+
+        <p className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-ink-faint)]">
+          Restricted
+        </p>
+        <h1 className="font-display mt-3 text-[clamp(2.5rem,6vw,4rem)] leading-[1] tracking-[-0.02em]">
+          Sign in to <em className="italic text-[var(--color-accent)]">continue.</em>
+        </h1>
+        <p className="mt-5 max-w-[40ch] text-[15px] leading-relaxed text-[var(--color-ink-muted)]">
+          Single‑account studio. One key opens the door.
+        </p>
+
+        <Suspense fallback={null}>
+          <LoginForm />
+        </Suspense>
+      </div>
     </main>
   );
 }

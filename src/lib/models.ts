@@ -56,7 +56,10 @@ const DEFAULTS: Record<Category, CategoryConfig> = {
     label: "Text Generation",
     description: "Chat / completion via open LLM",
     prod: {
-      id: "meta-llama/Llama-3.3-70B-Instruct",
+      // Apache 2.0, ungated, served on HF Inference Providers free tier.
+      // Llama-3.3-70B was the original pick but Meta gating + PRO requirement
+      // made it 401 for fresh accounts.
+      id: "Qwen/Qwen2.5-7B-Instruct",
       strategy: "inference",
     },
     local: {

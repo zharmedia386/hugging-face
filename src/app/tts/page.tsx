@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Shell from "../_components/shell";
+import { Button, ErrorNote, FieldLabel, OutputBlock, Textarea } from "../_components/ui";
 
 const VOICES = [
   { id: "af_heart", label: "Heart (female)" },
@@ -41,54 +42,53 @@ export default function TtsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <Link href="/" className="text-sm text-zinc-500 hover:underline">
-        ← back
-      </Link>
-      <h1 className="mt-4 text-3xl font-bold">Text → Speech</h1>
-      <p className="mt-2 text-sm text-zinc-500">Kokoro-82M voice synth.</p>
+    <Shell
+      index="04"
+      title={`Text → speech.`}
+      description="Kokoro-82M reads what you write. Pick a voice, hit play."
+    >
+      <label className="block">
+        <FieldLabel>Script</FieldLabel>
+        <Textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="What should I say?"
+        />
+      </label>
 
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Type something to speak…"
-        className="mt-6 h-32 w-full rounded-md border border-zinc-200 bg-white p-3 text-sm outline-none focus:border-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:border-zinc-200"
-      />
+      <div className="mt-5">
+        <FieldLabel>Voice</FieldLabel>
+        <div className="flex flex-wrap gap-2">
+          {VOICES.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              onClick={() => setVoice(v.id)}
+              className={`rounded-full border px-4 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
+                voice === v.id
+                  ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-accent-ink)]"
+                  : "border-[var(--color-line)] text-[var(--color-ink-muted)] hover:border-[var(--color-line-strong)] hover:text-[var(--color-ink)]"
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      <select
-        value={voice}
-        onChange={(e) => setVoice(e.target.value)}
-        className="mt-3 rounded-md border border-zinc-200 bg-white p-2 text-sm dark:border-zinc-800 dark:bg-zinc-950"
-      >
-        {VOICES.map((v) => (
-          <option key={v.id} value={v.id}>
-            {v.label}
-          </option>
-        ))}
-      </select>
+      <div className="mt-6">
+        <Button onClick={submit} disabled={loading || !text.trim()}>
+          {loading ? "Synthesizing…" : "Speak →"}
+        </Button>
+      </div>
 
-      <button
-        onClick={submit}
-        disabled={loading || !text.trim()}
-        className="ml-3 mt-3 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-      >
-        {loading ? "Synthesizing…" : "Speak"}
-      </button>
-
-      {error && (
-        <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-          {error}
-        </p>
-      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
 
       {audioUrl && (
-        <audio
-          controls
-          src={audioUrl}
-          className="mt-6 w-full"
-          autoPlay
-        />
+        <OutputBlock>
+          <audio controls src={audioUrl} autoPlay className="w-full" />
+        </OutputBlock>
       )}
-    </main>
+    </Shell>
   );
 }

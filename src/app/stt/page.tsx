@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Shell from "../_components/shell";
+import { Button, ErrorNote, FieldLabel, OutputBlock } from "../_components/ui";
 
 export default function SttPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -29,41 +30,43 @@ export default function SttPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <Link href="/" className="text-sm text-zinc-500 hover:underline">
-        ← back
-      </Link>
-      <h1 className="mt-4 text-3xl font-bold">Speech → Text</h1>
-      <p className="mt-2 text-sm text-zinc-500">
-        Upload .mp3 / .wav / .m4a — Whisper transcribes it.
-      </p>
+    <Shell
+      index="03"
+      title="Speech → text."
+      description="Whisper transcribes an audio clip to text. MP3, WAV, M4A all welcome."
+    >
+      <label className="block">
+        <FieldLabel>Audio file</FieldLabel>
+        <div className="rounded-md border border-dashed border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-6">
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="block w-full text-sm text-[var(--color-ink-muted)] file:mr-4 file:rounded-sm file:border-0 file:bg-[var(--color-surface-2)] file:px-3 file:py-2 file:font-mono file:text-[11px] file:uppercase file:tracking-wider file:text-[var(--color-ink)] hover:file:bg-[var(--color-line)]"
+          />
+          {file && (
+            <p className="mt-3 font-mono text-xs text-[var(--color-ink-faint)]">
+              {file.name} · {(file.size / 1024).toFixed(1)} KB
+            </p>
+          )}
+        </div>
+      </label>
 
-      <input
-        type="file"
-        accept="audio/*"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        className="mt-6 block w-full text-sm"
-      />
+      <div className="mt-5">
+        <Button onClick={submit} disabled={loading || !file}>
+          {loading ? "Listening…" : "Transcribe →"}
+        </Button>
+      </div>
 
-      <button
-        onClick={submit}
-        disabled={loading || !file}
-        className="mt-3 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-      >
-        {loading ? "Transcribing…" : "Transcribe"}
-      </button>
-
-      {error && (
-        <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-          {error}
-        </p>
-      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
 
       {output && (
-        <pre className="mt-6 whitespace-pre-wrap rounded-md border border-zinc-200 p-4 text-sm dark:border-zinc-800">
-          {output}
-        </pre>
+        <OutputBlock>
+          <pre className="whitespace-pre-wrap font-sans text-[15px] leading-relaxed text-[var(--color-ink)]">
+            {output}
+          </pre>
+        </OutputBlock>
       )}
-    </main>
+    </Shell>
   );
 }

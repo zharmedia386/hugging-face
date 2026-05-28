@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Shell from "../_components/shell";
+import { Button, ErrorNote, FieldLabel, OutputBlock } from "../_components/ui";
 
 export default function ImageTo3dPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -29,65 +30,66 @@ export default function ImageTo3dPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <Link href="/" className="text-sm text-zinc-500 hover:underline">
-        ← back
-      </Link>
-      <h1 className="mt-4 text-3xl font-bold">Image → 3D</h1>
-      <p className="mt-2 text-sm text-zinc-500">
-        TripoSR converts single image to .glb mesh. Slow on free ZeroGPU (1–3 min).
-      </p>
+    <Shell
+      index="06"
+      title="Image → 3D."
+      description="TripoSR turns a single image into a .glb mesh. Slow on the free queue — one to three minutes."
+    >
+      <label className="block">
+        <FieldLabel>Source image</FieldLabel>
+        <div className="rounded-md border border-dashed border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-6">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="block w-full text-sm text-[var(--color-ink-muted)] file:mr-4 file:rounded-sm file:border-0 file:bg-[var(--color-surface-2)] file:px-3 file:py-2 file:font-mono file:text-[11px] file:uppercase file:tracking-wider file:text-[var(--color-ink)] hover:file:bg-[var(--color-line)]"
+          />
+          {file && (
+            <p className="mt-3 font-mono text-xs text-[var(--color-ink-faint)]">
+              {file.name} · {(file.size / 1024).toFixed(1)} KB
+            </p>
+          )}
+        </div>
+      </label>
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        className="mt-6 block w-full text-sm"
-      />
+      <div className="mt-5">
+        <Button onClick={submit} disabled={loading || !file}>
+          {loading ? "Sculpting…" : "Generate mesh →"}
+        </Button>
+      </div>
 
-      <button
-        onClick={submit}
-        disabled={loading || !file}
-        className="mt-3 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-      >
-        {loading ? "Generating mesh…" : "Generate 3D"}
-      </button>
-
-      {error && (
-        <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-          {error}
-        </p>
-      )}
+      {error && <ErrorNote>{error}</ErrorNote>}
 
       {meshUrl && (
-        <div className="mt-6 space-y-3">
-          <a
-            href={meshUrl}
-            download
-            className="inline-block rounded-md border border-zinc-200 px-3 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
-          >
-            ⬇ Download .glb
-          </a>
-          {/* model-viewer is a web-component; load via CDN for quick preview. */}
-          <model-viewer
-            src={meshUrl}
-            alt="Generated 3D mesh"
-            camera-controls
-            auto-rotate
-            style={{
-              width: "100%",
-              height: "480px",
-              background: "#0a0a0a",
-              borderRadius: "0.5rem",
-            }}
-          />
-          <script
-            type="module"
-            src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"
-            async
-          />
-        </div>
+        <OutputBlock>
+          <div className="space-y-4">
+            <a
+              href={meshUrl}
+              download
+              className="inline-flex items-center gap-2 rounded-md border border-[var(--color-line)] px-4 py-2 font-mono text-[11px] uppercase tracking-wider text-[var(--color-ink-muted)] hover:border-[var(--color-line-strong)] hover:text-[var(--color-ink)]"
+            >
+              <span aria-hidden>↓</span> Download .glb
+            </a>
+            <model-viewer
+              src={meshUrl}
+              alt="Generated 3D mesh"
+              camera-controls
+              auto-rotate
+              style={{
+                width: "100%",
+                height: "520px",
+                background: "oklch(0.12 0.008 60)",
+                borderRadius: "0.375rem",
+              }}
+            />
+            <script
+              type="module"
+              src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"
+              async
+            />
+          </div>
+        </OutputBlock>
       )}
-    </main>
+    </Shell>
   );
 }
